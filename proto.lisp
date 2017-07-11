@@ -35,7 +35,7 @@
 								("client_id" . ,(google-client-id client))
 								("client_secret" . ,(google-client-secret client))
 								("grant_type" . "authorization_code")
-								("redirect-uri" . ,(google-redirect-uri client)))))))
+								("redirect_uri" . ,(google-redirect-uri client)))))))
 					 
 (defun spreadsheet-append (spreadsheet range values)
   (drakma:http-request
