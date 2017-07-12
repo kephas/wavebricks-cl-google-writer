@@ -8,5 +8,5 @@
   :version "0.1"
   :author "Pierre Thierry <pierre@nothos.net>"
   :class :package-inferred-system
-  :depends-on ("wavebricks-cl-google-writer/proto")
+  :depends-on ("wavebricks-cl-google-writer/web")
   :licence "AGPL")

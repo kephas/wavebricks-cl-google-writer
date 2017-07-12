@@ -1,10 +1,11 @@
-(defpackage :wavebricks-cl-google-writer/proto
+(defpackage :wavebricks-cl-google-writer/google
   (:use :cl :alexandria :cl-json)
   (:import-from :drakma #:http-request)
   (:import-from :flexi-streams #:octets-to-string)
-  (:import-from :quri #:make-uri #:render-uri))
+  (:import-from :quri #:make-uri #:render-uri)
+  (:export #:make-google-client #:google-auth-url #:google-token-request! #:spreadsheet-append!))
 
-(in-package :wavebricks-cl-google-writer/proto)
+(in-package :wavebricks-cl-google-writer/google)
 
 
 (defparameter *scope* "https://www.googleapis.com/auth/spreadsheets")
@@ -16,6 +17,9 @@
    (scopes :initarg :scopes :reader google-scopes)
    (redirect-uri :initarg :uri :reader google-redirect-uri)))
 
+(defun make-google-client (id secret uri)
+  (make-instance 'google-client :id id :secret secret :scopes *scope* :uri uri))
+
 
 (defun google-auth-url (client)
   (render-uri
@@ -26,7 +30,7 @@
 					  ("scope" . ,*scope*)
 					  ("access_type" . "offline")))))
 
-(defun google-token-request (client code)
+(defun google-token-request! (client code)
   (decode-json-from-string
    (octets-to-string
 	(http-request "https://www.googleapis.com/oauth2/v4/token"
@@ -37,7 +41,7 @@
 								("grant_type" . "authorization_code")
 								("redirect_uri" . ,(google-redirect-uri client)))))))
 					 
-(defun spreadsheet-append (spreadsheet range values)
+(defun spreadsheet-append! (spreadsheet range values)
   (drakma:http-request
    (render-uri (make-uri :defaults (format nil "https://sheets.googleapis.com/v4/spreadsheets/~a/values/~a:append" spreadsheet range)
 						 :query `(("key" . ,*api-key*))))
