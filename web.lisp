@@ -16,10 +16,11 @@
 		 (:body
 		  ,@content))))))
 
-(defun ningle-param (params name) (cdr (assoc name params)))
+(defun ningle-param (params name) (cdr (assoc name params :test 'equal)))
 
 
 (defparameter *redirect-path* "/oauth")
+(defvar *redirect-uri*)
 
 (defun local-redirect-uri (request)
   (bind (((&key url-scheme server-name server-port &allow-other-keys) (lack.request:request-env request)))
@@ -29,13 +30,32 @@
 (setf (route *app* "/")
 	  (lambda (params)
 		(declare (ignore params))
+		(setf *redirect-uri* (local-redirect-uri *request*))
 		(page "Wavebricks Google Writer"
 		  (:h1 "Setup")
-		  (:p "Redirect URI: " (:code (str (local-redirect-uri *request*))))
+		  (:p "Redirect URI: " (:code (str *redirect-uri*)))
 		  ((:form :action "/setup" :method "POST")
 		   (:p "ID: " (:input :type "text" :name "id"))
 		   (:p "Secret: " (:input :type "text" :name "secret"))
-		   (:input :type "button" :value "Save")))))
+		   (:input :type "submit" :value "Save")))))
+
+(defvar *google-client*)
+
+(setf (route *app* "/setup" :method :post)
+	  (lambda (params)
+		(let ((id (ningle-param params "id"))
+			  (secret (ningle-param params "secret")))
+		  (setf *google-client* (make-google-client id secret *redirect-uri*))
+		  (setf (lack.response:response-status *response*) 302)
+		  (setf (lack.response:response-headers *response*)
+				(list :location (google-auth-url *google-client*)))
+		  "")))
+
+(setf (route *app* *redirect-path*)
+	  (lambda (params)
+		(let ((code (ningle-param params "code")))
+		  (google-token-request! *google-client* code))
+		(page "Done" (:p "Tokens retrieved."))))
 
 
 (defparameter *default-port* 5555)

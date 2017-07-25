@@ -3,6 +3,8 @@
 
 (in-package :wavebricks-cl-google-writer-system)
 
+(register-system-packages "simple-date-time" '(:date-time))
+
 (defsystem "wavebricks-cl-google-writer"
   :description "LoRaWAN application server that appends packet data to a Google spreadsheet"
   :version "0.1"
