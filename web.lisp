@@ -1,6 +1,7 @@
 (defpackage :wavebricks-cl-google-writer/web
-  (:use :cl :alexandria :metabang-bind :cl-who :clack :ningle :wavebricks-cl-google-writer/google)
+  (:use :cl :alexandria :metabang-bind :cl-json :cl-who :clack :ningle :wavebricks-cl-google-writer/google)
   (:import-from :uiop #:getenv)
+  (:import-from :flexi-streams #:octets-to-string)
   (:import-from :quri #:make-uri #:render-uri))
 
 (in-package :wavebricks-cl-google-writer/web)
@@ -56,6 +57,23 @@
 		(let ((code (ningle-param params "code")))
 		  (google-token-request! *google-client* code))
 		(page "Done" (:p "Tokens retrieved."))))
+
+
+(defun json-request (req)
+  (decode-json-from-string (octets-to-string (lack.request:request-content req))))
+
+(defvar *spreadsheet-id*)
+(defparameter *range* "A1") ; Google Sheets seems to ignore it
+
+(setf (route *app* "/callback" :method :post)
+	  (lambda (params)
+		(declare (ignore params))
+		(bind (((:alist (id :id) (version :version) (type :type) (gw :gateway--id) (base64 :payload--base64)
+						(sf :spreading--factor) (freq :frequency) (cr :coding--rate) (rssi :rssi) (snr :snr)
+						(bw :bandwidth) (date :received--at))
+				(json-request *request*)))
+		  (spreadsheet-append! *google-client* *spreadsheet-id* *range* (list id version type gw base64 sf freq cr rssi snr bw date)))
+		""))
 
 
 (defparameter *default-port* 5555)
