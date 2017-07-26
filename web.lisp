@@ -5,7 +5,8 @@
   (:import-from :uiop #:getenv)
   (:import-from :cl-mongo #:parse-mongo-uri #:db.use)
   (:import-from :flexi-streams #:octets-to-string)
-  (:import-from :quri #:make-uri #:render-uri))
+  (:import-from :quri #:make-uri #:render-uri)
+  (:export #:start-server))
 
 (in-package :wavebricks-cl-google-writer/web)
 
