@@ -1,0 +1,12 @@
+web:
+  build: .
+  ports:
+    - "5555:80"
+    - "44005:4005"
+  links:
+    - mongo
+  environment:
+    - MONGODB_URI=mongodb://mongo
+  stdin_open: true
+mongo:
+  image: mongo
