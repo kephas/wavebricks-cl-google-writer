@@ -3,8 +3,9 @@
   (:import-from :drakma #:http-request)
   (:import-from :flexi-streams #:octets-to-string)
   (:import-from :quri #:make-uri #:render-uri)
-  (:import-from :date-time #:now #:second+ #:date-time<)
-  (:export #:make-google-client #:google-auth-url #:google-token-request! #:spreadsheet-append!))
+  (:import-from :simple-date-time #:now #:second+ #:date-time< #:date-time)
+  (:import-from :web-object-capabilities/mongo #:serialize #:unserialize)
+  (:export #:make-google-client #:google-client #:google-auth-url #:google-token-request! #:spreadsheet-append!))
 
 (in-package :wavebricks-cl-google-writer/google)
 
@@ -20,6 +21,13 @@
    (refresh-token :accessor google-refresh-token)
    (access-token :accessor google-access-token)
    (expiration-time :accessor google-expiration-time)))
+
+(defmethod serialize ((object date-time))
+  (simple-date-time:serialize object))
+
+(defmethod unserialize ((parent google-client) (slot (eql 'expiration-time)) object)
+  (declare (ignore parent slot))
+  (simple-date-time:deserialize object))
 
 (defun make-google-client (id secret uri)
   (make-instance 'google-client :id id :secret secret :scopes *scope* :uri uri))
