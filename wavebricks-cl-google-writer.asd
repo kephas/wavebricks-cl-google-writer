@@ -7,7 +7,7 @@
 
 (defsystem "wavebricks-cl-google-writer"
   :description "LoRaWAN application server that appends packet data to a Google spreadsheet"
-  :version "0.1"
+  :version "1.0"
   :author "Pierre Thierry <pierre@nothos.net>"
   :class :package-inferred-system
   :depends-on ("wavebricks-cl-google-writer/web")
